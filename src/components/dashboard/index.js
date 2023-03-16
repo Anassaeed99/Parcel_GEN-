@@ -13,7 +13,7 @@ import {
   Share,
   Button,
 } from 'react-native';
-import {INShortcut} from 'react-native-siri-shortcut';
+import {addShortcutListener, clearAllShortcuts, clearShortcutsWithIdentifiers, getShortcuts, INShortcut, SiriShortcutsEvent} from 'react-native-siri-shortcut';
 
 import styles from './style';
 import BottomSheet from 'react-native-custom-bottom-sheet';
@@ -143,6 +143,8 @@ export default class Dashboard extends Component {
       setMasterDataSource: [],
       packageArray: [],
       siriTitle: '',
+      getData:'',
+
       showCameraFlag: false,
     };
   }
@@ -413,20 +415,20 @@ export default class Dashboard extends Component {
   }
 
   flatList_Render(item) {
-    console.log('Dashboard');
-    console.log('***** flatlist render');
-    console.log(item);
-    console.log('.........');
-    console.log(`EstimatedDeliver ${item.EstimatedDelivery}`);
-    console.log(`Carrier ${item.Carrier}`);
-    console.log(`StatusType ${item.StatusType}`);
-    console.log(`StatusDescription ${item.StatusDescription}`);
-    console.log(`SignedForByName ${item.SignedForByName}`);
-    console.log(`StatusCode ${item.StatusCode}`);
-    console.log(`pkg ${item.Pkgs}`);
-    console.log(`IDIdentifier ${item.IDIdentifier}`);
-    console.log(`updateEnteredCaption ${item.Caption}`);
-    console.log('............');
+    // console.log('Dashboard');
+    // console.log('***** flatlist render');
+    console.log(item,'yyyyyyyy');
+    // console.log('.........');
+    // console.log(`EstimatedDeliver ${item.EstimatedDelivery}`);
+    // console.log(`Carrier ${item.Carrier}`);
+    // console.log(`StatusType ${item.StatusType}`);
+    // console.log(`StatusDescription ${item.StatusDescription}`);
+    // console.log(`SignedForByName ${item.SignedForByName}`);
+    // console.log(`StatusCode ${item.StatusCode}`);
+    // console.log(`pkg ${item.Pkgs}`);
+    // console.log(`IDIdentifier ${item.IDIdentifier}`);
+    // console.log(`updateEnteredCaption ${item.Caption}`);
+    // console.log('............');
 
     let delivered_by = '';
     let show_Image;
@@ -782,15 +784,19 @@ export default class Dashboard extends Component {
     }
   }
   searchSiriFunction(Caption) {
-    for (let i = 0; i < this.state.setFilteredDataSource.length; i++) {
-      //console.log(this.state.setFilteredDataSource[i].Caption);
-      if (this.state.setFilteredDataSource[i].Caption == Caption) {
-        return this.state.state.setFilteredDataSource.Caption;
-        // return this.state.setFilteredDataSource[i].Caption;
-      } else {
-        console.log('data not found');
-      }
-    }
+    // for (let i = 0; i < this.state.setFilteredDataSource.length; i++) {
+    //   //console.log(this.state.setFilteredDataSource[i].Caption);
+
+    //   console.log(this.state.setFilteredDataSource[0]);
+
+
+    //   if (this.state.setFilteredDataSource[i].Caption == Caption) {
+    //     return this.state.state.setFilteredDataSource.Caption;
+    //     // return this.state.setFilteredDataSource[i].Caption;
+    //   } else {
+    //     console.log('data not found');
+    //   }
+    // }
   }
 
   async Onclick_Delete() {
@@ -1053,7 +1059,7 @@ export default class Dashboard extends Component {
 
   render() {
     const {addToSiriStyle} = this.state;
-
+    console.log(this.state.setData,'render ');
     return (
       <>
         {this.state.loaderFlag ? <Loader /> : null}
@@ -1161,17 +1167,38 @@ export default class Dashboard extends Component {
             <View style={{alignSelf: 'center', bottom: '6%', height: 4}}>
               <AddToSiriButton
                 buttonStyle={addToSiriStyle}
-                onPress={() => {
-                  presentShortcut(opts1, ({status}) => {
-                    console.log('../..');
-                    // console.log(`I was ${status}`);
-                    console.log(`opts1 ${opts1.suggestedInvocationPhrase}`);
-                    console.log(opts1.title);
-                    console.log(JSON.stringify(opts1));
-                    //this.state.siriTitle = opts1.suggestedInvocationPhrase;
-                    // console.log(`opts1 ${this.state.siriTitle}`);
-                    // console.log('../..');
-                  });
+                onPress={ () => {
+                
+                  presentShortcut(opts1,  (status,phrase)  =>  {
+               
+                  })
+
+ 
+                  getShortcuts().then( async(data)=>{
+                  
+                    this.setState({setData:data[0]?.phrase})
+                    this.state.setFilteredDataSource.map((item)=>{
+                      if(item.Caption == data[0]?.phrase){
+                        console.log(item,"ITEM");
+                        this.setState({setFilteredDataSource:[item]})
+                        return this.state.setFilteredDataSource
+                      }
+                    })
+              
+              
+                    // setFilteredDataSource.map
+                  }).
+                  catch((err)=>{
+                    console.log("ERR",err);
+                  })
+           
+
+                 
+
+              
+        
+           
+                    
                 }}
                 shortcut={opts1}
               />
