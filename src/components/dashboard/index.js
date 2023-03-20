@@ -46,26 +46,21 @@ import {
   presentShortcut,
   AddToSiriButton,
   SiriButtonStyles,
+  getInitialShortcut,
 } from 'react-native-siri-shortcut';
 
 // SIRIIII
 //SIRIII
 const opts1 = {
-  activityType: 'com.github.gustash.SiriShortcutsModuleExample.sayHello',
+  activityType: 'org.reactjs.native.example.Parcel-Genie.usman',
   title: 'Tracking Number',
-  userInfo: {
-    foo: 1,
-    bar: 'baz',
-    baz: 34.5,
-  },
-  requiredUserInfoKeys: ['foo', 'bar', 'baz'],
-  keywords: ['kek', 'foo', 'bar'],
+
   persistentIdentifier:
-    'com.github.gustash.SiriShortcutsModuleExample.sayHello',
+    'org.reactjs.native.example.Parcel-Genie.usman',
   isEligibleForSearch: true,
   isEligibleForPrediction: true,
-  suggestedInvocationPhrase: 'Say something',
-  needsSave: false,
+  
+  needsSave: true,
 };
 // SIROOO
 
@@ -144,6 +139,7 @@ export default class Dashboard extends Component {
       packageArray: [],
       siriTitle: '',
       getData:'',
+      filteredData:[],
 
       showCameraFlag: false,
     };
@@ -263,7 +259,7 @@ export default class Dashboard extends Component {
       setMasterDataSource: Res,
     });
     console.log('&&&&&&&&&&&&&&&&');
-    console.log(this.state.setFilteredDataSource[i].Caption);
+    console.log(this.state.setFilteredDataSource[0].Caption);
   }
 
   handleVisibility = visibility => {
@@ -417,7 +413,7 @@ export default class Dashboard extends Component {
   flatList_Render(item) {
     // console.log('Dashboard');
     // console.log('***** flatlist render');
-    console.log(item,'yyyyyyyy');
+    // console.log(item,'yyyyyyyy');
     // console.log('.........');
     // console.log(`EstimatedDeliver ${item.EstimatedDelivery}`);
     // console.log(`Carrier ${item.Carrier}`);
@@ -1166,41 +1162,54 @@ export default class Dashboard extends Component {
             </View>
             <View style={{alignSelf: 'center', bottom: '6%', height: 4}}>
               <AddToSiriButton
-                buttonStyle={addToSiriStyle}
-                onPress={ () => {
-                
-                  presentShortcut(opts1,  (status,phrase)  =>  {
-               
-                  })
+                              shortcut={opts1}
 
- 
-                  getShortcuts().then( async(data)=>{
-                  
-                    this.setState({setData:data[0]?.phrase})
+                buttonStyle={addToSiriStyle}
+                onPress={async () => {
+                
+                  presentShortcut(opts1,  ({status,phrase})  =>  {
+                    // console.log("present :", phrase)
+                    this.setState({setData: phrase})
+
+
+
+
                     this.state.setFilteredDataSource.map((item)=>{
-                      if(item.Caption == data[0]?.phrase){
-                        console.log(item,"ITEM");
-                        this.setState({setFilteredDataSource:[item]})
-                        return this.state.setFilteredDataSource
+                      console.log(item?.Caption,"ITEM in map");
+                      if(item.Caption ==this.state.setData){
+                        console.log(item,"ITEM in if part");
+                        this.setState({filteredData:[item]})
+                        return this.state.filteredData
+                      }
+                      else{
+                        console.log('else part');
                       }
                     })
-              
-              
-                    // setFilteredDataSource.map
+   
+                  })
+
+                  const res = await getShortcuts();
+                  // console.log(res);
+
+                  const inits = await getInitialShortcut();
+                  // console.log(inits);
+
+                  
+                  getShortcuts().then( (data)=>{
+          
+           
                   }).
                   catch((err)=>{
                     console.log("ERR",err);
                   })
            
 
-                 
 
               
         
            
                     
                 }}
-                shortcut={opts1}
               />
             </View>
 
@@ -1215,7 +1224,7 @@ export default class Dashboard extends Component {
                 return (
                   <View style={styles.View8}>
                     <FlatList
-                      data={this.state.setFilteredDataSource}
+                      data={ this.state.filteredData.length>0?this.state.filteredData: this.state.setFilteredDataSource}
                       renderItem={({item}) => this.flatList_Render(item)}
                       keyExtractor={(item, index) => index.toString()}
                     />
